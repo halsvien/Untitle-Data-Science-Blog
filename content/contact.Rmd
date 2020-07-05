@@ -1,0 +1,8 @@
+---
+title: "Contact"
+author: "Hal Svien"
+date: "7/5/2020"
+output: Rmd
+---
+
+You can contact me a few different ways: <halsvien@gmail.com>, through LinkedIn or GitHub (linked at the top of this page) or really any other way you can find me.
