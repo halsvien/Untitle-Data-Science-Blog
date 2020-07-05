@@ -1,10 +1,13 @@
 ---
 title: "About"
-output: pdf_document
+output:
+  word_document: default
+  html_document:
+    df_print: paged
 date: '2020-07-04T21:06:00-06:00'
 ---
 
-My name is Hal Svien; I'm currently a product analyst in the financial tech industry. Check out the LinkedIn page on this site to see more about me and my work history. I have a master's degree in psychology from Brigham Young University. I'm currently in the [data science professional certificate through HarvardX](https://www.edx.org/professional-certificate/harvardx-data-science). I use the [**blogdown**] package in R to create this site. You can find the Github repository link at the top of the page. You can also find my contact information near there if you want to know any more about me.
+My name is Hal Svien; I'm currently a product analyst in the financial tech industry. Check out the LinkedIn page on this site to see more about me and my work history. I have a master's degree in psychology from Brigham Young University. I'm currently in the [data science professional certificate through HarvardX](https://www.edx.org/professional-certificate/harvardx-data-science). I use the **blogdown** package in R to create this site. You can find the Github repository link at the top of the page. You can also email me any time at <halsvien@gmail.com>.
 
 I'm going to use this data science blog to explore cool uses of statistics and data science techniques. I was mostly trained in the general linear model of statistics, so over time I'll try to take on projects where I use the generalized linear model, machine learning, and structural equation modeling (which I already know, to some degree). 
 
