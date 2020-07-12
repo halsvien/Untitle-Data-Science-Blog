@@ -1,0 +1,7 @@
+---
+title: "CV"
+author: "Hal Svien"
+date: "7/12/2020"
+---
+
+Check out my [CV here](/pdf/HaroldSvien_CurriculumVitae.pdf). It is current as of July 2020.
