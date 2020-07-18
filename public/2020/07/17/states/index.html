@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.73.0" />
+
+
+<title>Are Capitals the Biggest Cities in Each State? - Untitled Data Science Blog</title>
+<meta property="og:title" content="Are Capitals the Biggest Cities in Each State? - Untitled Data Science Blog">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="/contact/">Contact Me</a></li>
+    
+    <li><a href="/cv/">CV</a></li>
+    
+    <li><a href="https://github.com/halsvien/Untitled-Data-Science-Blog">GitHub</a></li>
+    
+    <li><a href="https://www.linkedin.com/in/halsvien/">LinkedIn</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">9 min read</span>
+    
+
+    <h1 class="article-title">Are Capitals the Biggest Cities in Each State?</h1>
+
+    
+    <span class="article-date">2020-07-17</span>
+    
+
+    <div class="article-content">
+      
+
+
+<style type="text/css">
+h1 {
+  text-align: center;
+}
+</style>
+<div id="setting-the-stage" class="section level1">
+<h1>Setting the Stage</h1>
+<p>My girlfriend and I were talking the other day about how weird it is that most American states seem to have capitals that are not their biggest city. Upon further discussion, I thought of big cities like Salt Lake City, Utah (where I live), that actually are the state capital and the biggest city. So we really wanted to know ‘are there more of the biggest cities in each state that aren’t the capital versus those that are?’ But of course, a lot of questions abound when you think about this question: what do I mean by “biggest city?” How would we answer this question given the operational definition of the biggest city? Who cares?</p>
+<p>Let’s start by getting our heads around the research question here. What I mean by “biggest city” is the city that has the biggest population. A cool thing about using this defintion is that the US Census estimates the population every 10 years. We could use other indicators of city size like area covered in squared miles, the city’s population density, or maybe an index score of population and area; however, we will go with population counts because it’s pretty easy to understand and say what the good, the bad, and the ugly is about using this operational definition.</p>
+<p>Okay. Now we know how we are defining one central concern in this post. But what about answering the actual research question? This post is really about is comparing the counts of how many of the biggest cities in the United States are also the capital of that state. This is important: in answering this question, we will classify the biggest city in each state as either the capital or not. One more thing: we won’t consider territories, commonwealths, or federal districts, like Puerto Rico or Guam. So, we will only be discussing the contiguous United States plus Hawai’i and Alaska.</p>
+<p>Let’s talk data. I was really impressed with <a href="https://en.wikipedia.org/wiki/List_of_largest_cities_of_U.S._states_and_territories_by_population">the Wikipedia page listing the United States and its territories by population</a>. Its use of Census data and CIA World Factbook data leaves me confident of the accuracy of these population estimates. However, let’s be aware that these these data come from Wikipedia, the Census from which these data come was conducted in 2010, and that <a href="https://www.census.gov/programs-surveys/decennial-census/about/coverage-measurement.html">the Census has unique ways for estimating the US population without surveying <em>literally</em> every household</a>.</p>
+<p>I converted the table in that Wikipedia article into tabular format and added a column denoting Yes/No if that biggest city in that state is also the capital. Then I used the handy COUNTIF function in Excel to tally up the yeses and nos from that first tab of the sheet. You can find the data file (States.xls) for this post in the associated Github repository. We are essentially left with a 1X2 table showing counts of how many of the biggest cities in each state are also the capitals. Let’s read the data into R and look at them. Before we get to the good stuff, I’m using R version 3.6.3 <span class="citation">(R Core Team 2020)</span>.</p>
+</div>
+<div id="the-good-stuff" class="section level1">
+<h1>The Good Stuff</h1>
+<p>Let’s use the <strong>readxl</strong> <span class="citation">(Wickham and Bryan 2019)</span> package’s <code>read_excel</code> function to get the Excel data into R. I wanted to do a visualization here to see the relative size of each cell, <a href="http://www.sthda.com/english/wiki/chi-square-test-of-independence-in-r">like this cool example</a>, but the output is just too weird. This won’t stop us from looking at these data in other ways than raw counts.</p>
+<pre class="r"><code>states = read_excel(path, sheet = 2)
+
+states</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##     Yes    No
+##   &lt;dbl&gt; &lt;dbl&gt;
+## 1    17    33</code></pre>
+<p>As we can see, it seems like most of the biggest cities in each state are <em>not</em> the capital of that state. I want to visualize these data, but the tibble I imported isn’t playing nicely (I’m a newbie to R, so it’s definitely me). So, I created vectors below to get a bar plot to work.</p>
+<pre class="r"><code>count = c(17, 33)
+biggest = c(&quot;Yes&quot;, &quot;No&quot;)
+barplot(count, names.arg = biggest, ylim = c(0, 50), xlab = &quot;Biggest City is Also Capital?&quot;, ylab = &quot;Count of Cities&quot;, col = c(&quot;#FF5733&quot;, &quot;#C70039&quot;))</code></pre>
+<p><img src="/post/2020-07-06-states_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>The bar plot of these data is cool because it lets us visualize that there is roughly double the proportion of biggest cities that are the state capital versus those that are not. Let’s see these counts as proportions of the total.</p>
+<pre class="r"><code>states_prop = prop.table(states)
+
+states_prop</code></pre>
+<pre><code>##    Yes   No
+## 1 0.34 0.66</code></pre>
+<p>Now we see just over 1/3 of the biggest cities in each state is also the capital. But how would we see this with statistics using a null hypothesis test? Since the data we are using are counts, we are limited to nonparametric statistics. Why did I immediately say nonparametric? Because we are simply counting the variable we care about. Using parametric statistics implies using the ‘building blocks’ of general linear model statistics, meaning parameters of means and variances <span class="citation">(Warner 2012)</span>. If we had meaningful parameters, we could use a correlation coefficient or another method; see <span class="citation">Salkind and Shaw (2019)</span> for a fantastic table breaking down the right correlation coefficient to use that compliments the <a href="https://stats.idre.ucla.edu/other/mult-pkg/whatstat/">classic and wonderful UCLA IDRE site on choosing the right statistical test for your needs</a>.</p>
+<p>Now let’s talk about which statistic to use and interpret. The chi-squared test is what we will be using and interpreting here, if you didn’t already notice the post tags. As usual, I think <span class="citation">Salkind and Shaw (2019)</span> do a fantastic job giving a plain-language summary of what the chi-squared goodness of fit and test of independence are, both mathematically and conceptually. We’ll be using the chi-squared goodness of fit test here given the data are unidimensional (i.e., there are not two dimensions, such as if we added whether or not the capital city was originally the biggest in the state when it was established as the capital). Below is the formula for the chi-squared goodness of fit test and the null/alternative hypotheses. Using NHST <span class="citation">(Warner 2012)</span> with the chi-squared test, the null hypothesis is that there is no difference between the value we expect in each cell and the one we observe.</p>
+<p><span class="math display">\[
+\chi^{2}=\Sigma{\frac{{(O - E)}^{2}}{E}}
+\]</span></p>
+<p><span class="math display">\[
+H_0: O = E
+\]</span>
+<span class="math display">\[
+H_1: O\neq E
+\]</span></p>
+<p>The thing to notice above is the expected value. Applied here, the classic way of calculating the chi-squared goodness of fit test’s expected value is to take the total count we have (50) and divide it by the amount of cells (2). For our purposes, each cell having 1/2 of the total (25), seems pretty reasonable for rexpected values, given I don’t have other expected porportions that we might use instead. So, we expect 25 of the biggest cities in each category, being the capital and not the capital. The observed values used are the counts that we looked at above. Below is the good stuff.</p>
+<pre class="r"><code>chisq = chisq.test(states)
+chisq</code></pre>
+<pre><code>## 
+##  Chi-squared test for given probabilities
+## 
+## data:  states
+## X-squared = 5.12, df = 1, p-value = 0.02365</code></pre>
+<pre class="r"><code>observed = chisq$observed
+expected = chisq$expected
+observed</code></pre>
+<pre><code>## [1] 17 33</code></pre>
+<pre class="r"><code>expected</code></pre>
+<pre><code>## [1] 25 25</code></pre>
+<p><span class="math display">\[
+\chi^{2}(1)=5.12,{\,}p = .02
+\]</span></p>
+<p>The above are results of the chi-squared test, which I also pretty printed with MathJax below the code block. See those [1] rows? The first is our observed values, or the counts we discussed before. The second is the expected values. Notice how it defaulted to using the expected values how I defined them? Let’s come back to this in just a bit.</p>
+<p>Okay, now we have results. But what about interpretation? That’s the real gig here. The chi-squared statistic is statistically significant at the .05 level. However, what does this really mean? It means that if the the biggest cities in each state were equally distributed across the capital/not capital categories randomly, we would observed 25 in each category. The actual observed values differ from these expected values and this difference is statistically significant; if the counts were equally distributed among categories, we would observe results this extreme or more extreme ~2% of the time. Thus, the observed amount of states with the biggest cities also being the capitals does not fit the expected values (this is why it’s called the goodness of fit test).</p>
+<p>Let’s come back to that expected value piece I pointed out earlier. Using the expected values of 25 of the biggest cities each being and not being the state capital means that our interpreation above is sound. However, this definitely affects how we interpret our end results. I bring this up because the user can specify which probabilities they want R to use. Thus, I could’ve given R the vector <code>p(1/1.25, 1/5)</code> if I thought 80% of the biggest cities would be the capitals and 20% not. Not to belabor the point, but this change our interpretation. Instead of having statistically significant results departing from 25/25 in each category, we would have 40 of the biggest cities in each state being the capitals and 10 not <em>as the expected values</em>. Having statistically signficant results versus this null hypothesis would mean that the observed values do not fit those counts.</p>
+<p>So, where does this all leave us? We showed that the counts of American states’ biggest cities being or not being that state’s capital are statistically significant that depart from having equally distributed counts. Thus, having 33 (66%) of states’ biggest cities that are not the state capital and 17 (34%) that are departs from what we would expect by chance. As a reminder, these data come from the 2010 US Census. So, we couldn’t say that this has always been true or that it will hold true when the 2020 Census is completed. A more interesting question might involve adding a dimension of whether each state Capital was the biggest city <em>at the time it was designated as the capital</em>. I didn’t structure the data this way because this would involve digging into historical population records, but not impossible given <a href="https://www.census.gov/history/www/faqs/demographic_faqs/when_was_the_first_census_in_the_united_states.html">the first Census was conducted in 1790</a>; so, this is possible fodder for a future post. These data also only involve population counts as the standard for determining the biggest city and thus doesn’t involve anything like the city’s total area, as discussed above. As we think about the answer to this post’s question, we have to keep these limitations in mind. Thanks for reading, and send me any feedback you have!</p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-RCitation">
+<p>R Core Team. 2020. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.</p>
+</div>
+<div id="ref-SalkindStatsR">
+<p>Salkind, N. J, and L. A Shaw. 2019. <em>Statistics for People Who (Think They) Hate Statistics Using R</em>. Book. Thousand Oaks, CA: SAGE Publications.</p>
+</div>
+<div id="ref-WarnerStats">
+<p>Warner, R. M. 2012. <em>Applied Statistics: From Bivariate Through Multivariate Techniques</em>. Book. 2nd ed. Thousand Oaks, CA: Sage Publications.</p>
+</div>
+<div id="ref-Readxl">
+<p>Wickham, Hadley, and Jennifer Bryan. 2019. <em>Readxl: Read Excel Files</em>. <a href="https://CRAN.R-project.org/package=readxl">https://CRAN.R-project.org/package=readxl</a>.</p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
