@@ -62,7 +62,7 @@ barplot(count, names.arg = largest, ylim = c(0, 50), xlab = "Largest City is Als
 ```
 
 
-The bar plot of these data is cool because it lets us visualize that there is roughly double the proportion of largest cities that are the state capital versus those that are not. Let's see these counts as proportions of the total.
+The bar plot of these data is cool because it lets us visualize that there is roughly double the proportion of largest cities that are not the state capital versus those that are. Let's see these counts as proportions of the total.
 
 ```{r}
 states_prop = prop.table(states)
