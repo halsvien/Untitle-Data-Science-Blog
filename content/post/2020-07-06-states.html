@@ -44,7 +44,7 @@ states</code></pre>
 largest = c(&quot;Yes&quot;, &quot;No&quot;)
 barplot(count, names.arg = largest, ylim = c(0, 50), xlab = &quot;Largest City is Also Capital?&quot;, ylab = &quot;Count of Cities&quot;, col = c(&quot;#FF5733&quot;, &quot;#C70039&quot;))</code></pre>
 <p><img src="/post/2020-07-06-states_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>The bar plot of these data is cool because it lets us visualize that there is roughly double the proportion of largest cities that are the state capital versus those that are not. Let’s see these counts as proportions of the total.</p>
+<p>The bar plot of these data is cool because it lets us visualize that there is roughly double the proportion of largest cities that are not the state capital versus those that are. Let’s see these counts as proportions of the total.</p>
 <pre class="r"><code>states_prop = prop.table(states)
 
 states_prop</code></pre>
