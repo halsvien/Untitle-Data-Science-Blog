@@ -85,7 +85,7 @@ H_0: O = E
 H_1: O\neq E
 \]
 
-The thing to notice above is the expected value. Applied here, the classic way of calculating the chi-squared goodness of fit test's expected value is to take the total count we have (50) and divide it by the amount of cells (2). For our purposes, each cell having 1/2 of the total (25), seems pretty reasonable for rexpected values, given I don't have other expected porportions that we might use instead. So, we expect 25 of the largest cities  in each category, being the capital and not the capital. The observed values used are the counts that we looked at above. Below is the good stuff.
+The thing to notice above is the expected value. Applied here, the classic way of calculating the chi-squared goodness of fit test's expected value is to take the total count we have (50) and divide it by the amount of cells (2). For our purposes, each cell having 1/2 of the total (25), seems pretty reasonable for expected values, given I don't have other expected porportions that we might use instead. So, we expect 25 of the largest cities  in each category, being the capital and not the capital. The observed values used are the counts that we looked at above. Below is the good stuff.
 
 ```{r}
 
