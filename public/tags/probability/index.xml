@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>probability on Untitled Data Science Blog</title>
+    <link>/tags/probability/</link>
+    <description>Recent content in probability on Untitled Data Science Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 29 Oct 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/probability/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Probability Bonanza: Misconceptions and Confidence Intervals</title>
+      <link>/2020/10/29/probability-bonanza-misconceptions-and-confidence-intervals/</link>
+      <pubDate>Thu, 29 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/10/29/probability-bonanza-misconceptions-and-confidence-intervals/</guid>
+      <description>h1 {text-align: center;}Getting a GripAside from Theranos, I don’t know of any topic that has more mystique surrounding and people putting far too much stock (pun intended) into it than p-values. A very-much related, and probably less understood, topic is that of confidence intervals, which are essentially the stock market of the statistics world: no one understands them, but we all have a ton of speculation about what they’re doing.</description>
+    </item>
+    
+  </channel>
+</rss>
