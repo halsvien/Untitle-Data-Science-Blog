@@ -15,13 +15,15 @@ link-citation: TRUE
 biblio-style: "apalike"
 ---
 
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
 <link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
 <script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
 
 <div id="TOC">
 <ul>
 <li><a href="#getting-a-grip">Getting A Grip</a></li>
-<li><a href="#p-values"><em>p</em>-Values</a><ul>
+<li><a href="#p-values"><em>p</em>-Values</a>
+<ul>
 <li><a href="#step-one-assume-the-null-hypothesis-is-true">Step One: Assume The Null Hypothesis Is True</a></li>
 <li><a href="#step-two-convert-your-estimate-to-standard-error-units">Step Two: Convert Your Estimate to Standard Error Units</a></li>
 <li><a href="#step-three-determine-the-probability-of-observing-your-estimate">Step Three: Determine The Probability of Observing Your Estimate</a></li>
@@ -30,7 +32,8 @@ biblio-style: "apalike"
 <li><a href="#visual-example-of-p-values">Visual Example of <em>p</em>-Values</a></li>
 <li><a href="#conclusions-on-p-values">Conclusions on <em>p</em>-Values</a></li>
 </ul></li>
-<li><a href="#confidence-intervals">Confidence Intervals</a><ul>
+<li><a href="#confidence-intervals">Confidence Intervals</a>
+<ul>
 <li><a href="#what-is-a-confidence-interval">What Is A Confidence Interval?</a></li>
 <li><a href="#how-do-i-use-confidence-intervals">How Do I Use Confidence Intervals?</a></li>
 </ul></li>
@@ -162,7 +165,7 @@ The blue line is our obtained <span class="math inline">\(t\)</span> shown in th
 <blockquote>
 <p>Given this awkward interpretation of confidence intervals, I recommend you focus more on the width of the confidence interval rather than the specific numbers. In other words, use the confidence interval to learn about uncertainty rather than making probability statements about the population value.</p>
 </blockquote>
-<p>I do have something to add here, though. If you’ve taken a statistics class and CIs have been mentioned, you might have heard <a href="https://stats.stackexchange.com/questions/120949/why-does-a-confidence-interval-including-0-mean-the-difference-is-not-significan">‘if the interval contains zero, that means your result is significant’</a>. I’ve never found that intuitive, so it’s useful to break down the math here and show why that’s true while digesting the math in <a href="https://stats.stackexchange.com/a/410157">Zen’s</a> answer on that post. Let’s look at how to tranform the equation above:</p>
+<p>I do have something to add here, though. If you’ve taken a statistics class and CIs have been mentioned, you might have heard <a href="https://stats.stackexchange.com/questions/120949/why-does-a-confidence-interval-including-0-mean-the-difference-is-not-significan">‘if the interval contains zero, that means your result isn’t significant’</a>. I’ve never found that intuitive, so it’s useful to break down the math here and show why that’s true while digesting the math in <a href="https://stats.stackexchange.com/a/410157">Zen’s</a> answer on that post. Let’s look at how to tranform the equation above:</p>
 <p><span class="math display">\[
 \beta-Z\cdot SE &lt;\beta&lt;\beta+Z\cdot SE
 \]</span></p>
@@ -176,7 +179,7 @@ t-1.96 &lt;t&lt;t+1.96
 \]</span></p>
 <p>Here’s the thing to understand and link to the NHST process: if you estimate (<span class="math inline">\(t\)</span>) is <em>greater than the <span class="math inline">\(Z_{crit}\)</span>/<span class="math inline">\(t_{crit}\)</span> for your chosen alpha, it is, by definition, more than that many standard error units away from zero</em>. Therefore, from the equation above, if that lower or upper bound crosses zero, it means your estimate is not far enough away from a population centered on zero to be statistically significant. Let’s look at this visually:
 <img src="/post/2020-11-25-probability_bonanza_files/figure-html/unnamed-chunk-7-1.png" width="672" />
-Now we have two distributions on the same graph: one centered on 0, and one centered on 3.5, in standard error units. The red line still shows the <span class="math inline">\(t_{crit}\)</span> for rejecting the null hypothesis. We see that the observed population of estimates, centered on 3.5, is clearly beyond the critical threshold, and is 3.5 standard error units away from zero; to beat a dead horse, this is <em>greater than the needed 1.96 standard error units needed to reject the null hypohesis</em>. This is essentially just the discussion above warmed over; however, to bring it back home, consider our fake interval of <span class="math inline">\(7.2, 95\%\ CI [3.17, 11.23]\)</span>. The interval doesn’t contain zero because the estimate is <em>more than 1.96 standard error units away from zero</em>. Consider any other distribution, degrees of freedom, and one-or-two-tailed nature of the test, this still still hold true: if the interval contains zero, it isn’t significant per your defined alpha, which changes the <span class="math inline">\(Z\)</span> or <span class="math inline">\(t\)</span> term used to calculate the interval. Now that we have a common understanding, let’s address some more common misconceptions.</p>
+Now we have two distributions on the same graph: one centered on 0, and one centered on 3.5, in standard error units. The red line still shows the <span class="math inline">\(t_{crit}\)</span> for rejecting the null hypothesis. We see that the observed population of estimates, centered on 3.5, is clearly beyond the critical threshold, and is 3.5 standard error units away from zero; to beat a dead horse, this is <em>greater than the needed 1.96 standard error units needed to reject the null hypothesis</em>. This is essentially just the discussion above warmed over; however, to bring it back home, consider our fake interval of <span class="math inline">\(7.2, 95\%\ CI [3.17, 11.23]\)</span>. The interval doesn’t contain zero because the estimate is <em>more than 1.96 standard error units away from zero</em>. Consider any other distribution, degrees of freedom, and one-or-two-tailed nature of the test, this still still hold true: if the interval contains zero, it isn’t significant per your defined alpha, which changes the <span class="math inline">\(Z\)</span> or <span class="math inline">\(t\)</span> term used to calculate the interval. Now that we have a common understanding, let’s address some more common misconceptions.</p>
 </div>
 </div>
 <div id="common-misconceptions" class="section level2">
@@ -200,12 +203,12 @@ Now we have two distributions on the same graph: one centered on 0, and one cent
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
-<div id="refs" class="references">
-<div id="ref-BaldwinStata">
-<p>Baldwin, S. A. 2019. <em>Psychological Statistics and Psychometrics Using Stata</em>. Book. College Station, TX: Stata Press.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-BaldwinStata" class="csl-entry">
+Baldwin, S. A. 2019. <em>Psychological Statistics and Psychometrics Using Stata</em>. Book. College Station, TX: Stata Press.
 </div>
-<div id="ref-Tidy">
-<p>Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019. “Welcome to the tidyverse.” <em>Journal of Open Source Software</em> 4 (43): 1686. <a href="https://doi.org/10.21105/joss.01686">https://doi.org/10.21105/joss.01686</a>.</p>
+<div id="ref-Tidy" class="csl-entry">
+Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019. <span>“Welcome to the <span class="nocase">tidyverse</span>.”</span> <em>Journal of Open Source Software</em> 4 (43): 1686. <a href="https://doi.org/10.21105/joss.01686">https://doi.org/10.21105/joss.01686</a>.
 </div>
 </div>
 </div>
