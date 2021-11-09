@@ -1,0 +1,31 @@
+---
+title: "Crime Data"
+author: "Hal Svien"
+date: "11/9/2021"
+output:
+  blogdown::html_page:
+    toc: true
+---
+
+This is my page for crime data sets I've created for anyone to use! Each section is for a separate data set that you can download with a click.
+
+## UCR Data 2000-2019
+
+Check out my curated [UCR Data from 2000 to 2019!](/csv/ucr_data_2000_to_2019.csv) I made this 11/8/2021. The data include the columns below and are mostly FBI UCR data unless otherwise noted. Check out my post on crime data to see a lot of detail about these data and how I created the data set.
+
+* The measurement year (Year)
+* The measurement state's postal abbreviation (State_Abbr)
+* The measurement state's full name (State)
+* How many UCR violent crimes were reported in that measurement year and state (Violent_Crime)
+* How many homicides were reported in that measurement year and state (Homicides)
+* How many UCR legacy rapes were reported in that measurement year and state (Rape_Legacy)
+* How many UCR revised rapes were reported in that measurement year and state (Rape_Revised)
+* How many robberies were reported in that measurement year and state (Robbery)
+* How many aggravated assault were reported in that measurement year and state (Aggravated_Assault)
+* How many property crimes were reported in that measurement year and state (Property_Crime)
+* How many burglaries were reported in that measurement year and state (Burglary)
+* How many larcenies were reported in that measurement year and state (Larceny)
+* How many motor vehicle thefts were reported in that measurement year and state (Motor_Vehicle_Theft)
+* How many law enforcement officers (i.e., police) were employed in the state in that measurement year (LEOs)
+* The intercensal estimate of the state's population in a given measurement year per the United State Census Bureau (Population)
+* The number of LEOs per 1,000 people in the state in the given measurement year (i.e., Population divided by LEOs then multiplied by 1,000)

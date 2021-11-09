@@ -1,0 +1,277 @@
+---
+title: "Let's Talk About Crime"
+author: "Hal Svien"
+date: '2021-11-09'
+output:
+  blogdown::html_page:
+    toc: true
+slug: let-s-talk-about-crime
+categories: []
+tags: []
+bibliography: [Post_lib.bib]
+link-citation: TRUE
+biblio-style: apalike
+---
+
+```{r libs, echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(httr)
+library(readxl)
+library(knitr)
+library(DT)
+```
+
+## Intro
+
+What do you think of when you think about crime? Is it a specific type? My brain jumps to types of crime, like murders and rapes, and famous examples, like [Brock Turner](https://en.wikipedia.org/wiki/People_v._Turner). I've let my blog go stagnant for a long time, so I wanted to get my mojo back by doing a series on arguably my favorite analytical methods: regression-based predictive modeling. The series is going to be three posts on 1) correlations, 2)  regression, and 3) the grand daddy: mixed models. 
+
+But wait, why did I ask about crime up top? It's because I'm going to create a common data set to use in the upcoming posts. [I have a BS in criminology](https://www.untitleddatascienceblog.com/cv/), so we might as well use real world crime data and add a little nuance to the data that we analyze. I'm going to let you in on a secret: crime data are generally terrible.
+
+```{r data, echo = FALSE, include = FALSE}
+# Getting the data
+
+## FBI crime estimates by year and state
+crime = tempfile()
+download.file("https://s3-us-gov-west-1.amazonaws.com/cg-d4b776d0-d898-4153-90c8-8336f86bdfec/estimated_crimes_1979_2019.csv", crime)
+crime = read.csv(crime)
+
+## FBI agency-provided counts of police by year and state
+police = tempfile()
+download.file("https://s3-us-gov-west-1.amazonaws.com/cg-d4b776d0-d898-4153-90c8-8336f86bdfec/pe_1960_2019.csv", police)
+police = read.csv(police)
+
+## Joining the two above
+
+crime_and_police = inner_join(crime, police, by = c("state_abbr" = "state_postal_abbr", "year" = "data_year"))
+
+### The population estimates from the FBI don't match each other. Let's get Census Bureau estimates to have a common structure
+
+## Intercensal estimates of population
+
+### 2010-2019
+
+url_ten_to_nineteen = "https://www2.census.gov/programs-surveys/popest/tables/2010-2019/state/totals/nst-est2019-01.xlsx"
+GET(url_ten_to_nineteen, write_disk(tf <- tempfile(fileext = ".xlxs")))
+ten_to_nineteen = read_excel(tf)
+
+#### The first two lines aren't needed
+
+ten_to_nineteen = ten_to_nineteen[-c(1:2),]
+
+#### Re-naming the columns. The first row has the years so I can gather them
+
+colnames(ten_to_nineteen) = ten_to_nineteen[1,]
+
+#### Getting rid of the first column as it's a duplicate and the rows for regions and US total
+
+ten_to_nineteen = ten_to_nineteen[-c(1:6),]
+
+#### Getting rid of the last few rows as they're stuff like the citation
+
+ten_to_nineteen = ten_to_nineteen[-c(52:56),]
+
+#### Re-naming state column
+
+colnames(ten_to_nineteen)[1] = "State"
+
+#### Getting rid of the period before the state names
+
+ten_to_nineteen$State = substr(ten_to_nineteen$State, 2, nchar(ten_to_nineteen$State))
+
+#### Getting rid of the two columns for Census and Estimates Base
+
+ten_to_nineteen = ten_to_nineteen[, -c(2:3)]
+
+#### Changing 2010 to be numeric
+
+ten_to_nineteen$`2010` = as.numeric(ten_to_nineteen$`2010`)
+
+#### Getting rid of the last two rows as they are not needed
+
+ten_to_nineteen = ten_to_nineteen[-c(52:53),]
+
+#### Getting these data into a tidy format
+
+ten_to_nineteen = gather(ten_to_nineteen, "Year", "Population", `2010`:`2019`)
+
+#### Changing year back to numeric
+
+ten_to_nineteen$Year = as.numeric(ten_to_nineteen$Year)
+
+### 2000-2009
+
+url_ought_to_nine = "https://www2.census.gov/programs-surveys/popest/tables/2000-2010/intercensal/state/st-est00int-01.xls"
+GET(url_ought_to_nine, write_disk(tf <- tempfile(fileext = ".xls")))
+ought_to_nine = read_excel(tf)
+
+ought_to_nine = as.data.frame(ought_to_nine)
+
+#### Re-naming columns
+
+colnames(ought_to_nine) = ought_to_nine[3,]
+
+#### Getting rid of rows I don't need
+
+ought_to_nine = ought_to_nine[-c(1:8),]
+
+ought_to_nine = ought_to_nine[-c(52:59),]
+
+#### Getting rid of the period before the state names and re-naming the column
+
+colnames(ought_to_nine)[1] = "State"
+
+ought_to_nine$State = substr(ought_to_nine$State, 2, nchar(ought_to_nine$State))
+
+#### Getting rid of the final columns I don't need
+
+ought_to_nine = ought_to_nine[-2]
+
+ought_to_nine = ought_to_nine[-c(12:13)]
+
+#### Getting these data into a tidy format
+
+ought_to_nine = gather(ought_to_nine, "Year", "Population", `2000`:`2009`)
+
+#### Changing year and population back to numeric
+
+ought_to_nine$Year = as.numeric(ought_to_nine$Year)
+ought_to_nine$Population = as.numeric(ought_to_nine$Population)
+
+## No more data could be found that didn't break down by some statistic (e.g., age and sex)
+
+## Putting together the full data
+
+census = union(ought_to_nine, ten_to_nineteen)
+
+full_data = crime_and_police %>% filter(between(year, 2000, 2019)) %>% 
+  select(year, state_abbr, state_name, violent_crime, homicide, rape_legacy, rape_revised, robbery, aggravated_assault, property_crime, burglary, larceny, motor_vehicle_theft, officer_count) %>%
+  left_join(census, by = c("state_name" = "State", "year" = "Year"))
+
+colnames(full_data) = c("Year", "State_Abbr", "State", "Violent_Crime", "Homicides", "Rape_Legacy", "Rape_Revised", "Robbery", "Aggravated_Assault", "Property_Crime", "Burglary", "Larceny", "Motor_Vehicle_Theft", "LEOs", "Population")
+
+### Transforming the data to have a number of LEOs per 1000
+
+full_data = full_data %>% 
+  mutate(LEOs_per_1000 = LEOs/Population * 1000)
+```
+
+Let's get some actual examples here. The below table is a summary of the FBI's data on crimes from the years 2000 to 2019 by state. I kept all of the crime types, and we'll talk about what  they do and don't mean shortly.
+
+```{r table 1, echo = FALSE}
+full_data %>% 
+datatable(rownames = FALSE, 
+          options = list(
+            pageLength = 11, 
+            autoWidth = TRUE, 
+            scrollX = TRUE,
+            scrollY = TRUE,
+            columnDefs = list(list(
+              className = 'dt-left', 
+              targets = 0),
+              list(className = 'dt-center', targets = 1))))
+```
+
+You can find all of these data using the FBI's [Crime Data Explorer (CDE)](https://crime-data-explorer.fr.cloud.gov/pages/home), a really cool way to make crime data available, albeit a little annoying to use. I only used these years for a few reasons: 1) the population estimates in the CSVs don't match other FBI sources for the same state and year and 2) the crime statistics before the year 2000, from what I could see, always break down by demographics (e.g., age, sex) versus total counts. So, these data are what I could muster for a range of years after I joined to intercensal (there's a 10 dollar word) population estimates from the [US Census Bureau's data exploration tool](https://data.census.gov/cedsci/). Check out the code in this post if you're interested in how I did it!
+
+## Why Do This?
+
+I'm making this post for a few reasons. The first is to create a set of crime data resources and add the first entry to it, since I pretty much never see any social data that are ready to use. I'm planning on making multiple curated data sets that anyone can download. The second is to discuss what crime data do and don't mean, which is a level of nuance you don't often see in data science (at least in tutorials), even though it's a critical part of the job. The final reason is that I can get off my ass and do some work on my blog again.
+
+I'm going to lean really heavily on @Babbie's discussion of criminological data for this next portion. I've never seen a source that is more comprehensive in discussing the data we are about to compeletely (okay, mildly) gloss over.
+
+## All About Crime Data
+
+Alright, so I'll cherry-pick some of @Babbie's points to highlight how crime data get reported and tallied in the United States. That will help us discuss what these data I'm making do and don't mean.
+
+### What is a crime?
+
+I re-named @Babbie's section from "General Issues in Measuring Crime" because that's what this section of their book and my post are actually about. @Babbie's discussion highlights a great definition of crime in their quote of Wilson and Hernnstein (1985) below, as cited in Maxfield and Babbie.
+
+> “A crime is any act committed in violation of a law that prohibits it and authorizes punishment for its commission.”
+
+I like @Babbie's sections on General Issues in Measuring Crime because they highlight some interesting things about crimes: 
+
+1. They're based on local or federal legislation, making illegal things like taking Indiana ginseng out of state without permission 
+
+2. Measuring crimes might involve extremely different units of analysis (e.g., OJ Simpson brutally and personally killing his wife vs. a conspiratorial set of crimes like a the Medellin Cartel) 
+
+3. Asking *why* you're measuring crime (i.e., for accountability vs. research) can help guide what gets reported
+
+Okay, but what's the point? It's that crime data involve all of this nuance even though it might seem obvious what a rape is. Is it only terrible things like taking advantage of a helpless person, like Brock Turner? Or is it more nuanced, like [the case where condom use on the rapist's behalf was treated as consent?](https://insiderexclusive.com/condoms-do-not-equal-consent-xan-wilsons-story/) Obviously I think rape should have been charged along with burglary in the linked case, but this kind of stuff will affect how and if Valdez's crimes are reported in the data. What I'm getting at here is that there are going to be tremendous differences in how individual localities, juries, and the federal government think about crime and guilt. So, there is that nuance in both seeing what a crime is along with how those crimes get reported. Speaking of, how are crime data reported?
+
+## Crime Data in the United States
+
+Crime data in the United States have a relatively long history, which makes it cool and introduces legacy problems.
+
+### The UCR
+
+The [FBI's Uniform Crime Report](https://www.fbi.gov/services/cjis/ucr) has been collected and reported since 1930. It has two parts: 
+
+* Part I, being crimes reported to police involving almost everything in the table above like homicides and rapes
+
+* Part II, being crimes like shoplifting and drug use, but *only* if a crime was charged. The key here is that police might be aware of many incidences of Part II crimes, but they might not report them to the FBI
+
+I like to think about the UCR as a pyramid. At the bottom is the crime being committed. Only some of them go up to the next level of the agency (meaning organizations like the LA County Sheriffs). Next up is either the state agency or the FBI itself, as sometimes agencies submit to the state before the statistics are submitted to the FBI. Finally, after the FBI has all of the data, the UCR is compiled for a given year.
+
+#### The Dark Figure of Crime
+
+There is SO. MUCH. about which we should discuss related to the UCR. I'm going to keep this very high-level, but it'll still highlight some nitty gritty details. First is the [dark figure of crime](https://www.ncjrs.gov/ovc_archives/ncvrw/2017/images/en_artwork/Fact_Sheets/2017NCVRW_CrimeAndVictimization_508.pdf). I still remember [Tracy Tolbert](https://www.csulb.edu/criminology-criminal-justice-and-emergency-management/page/tracy-tolbert) using that phrase for the first time in class and me thinking "that's so fucking cool." 
+
+It's not though. **The dark figure of crime is about the fact that there are many, many crimes that the UCR can't report on for various reasons**. @Babbie note only the distinction about about Part II offenses not being report. Keep this in mind after we discuss the other parts of measuring crime in the UCR.
+
+#### Who Reports to UCR?
+
+Also important is the reporting engagement. As @Babbie note, not all agencies report crime data to the UCR. That is, not every law enforcement agency counts Parts I or II offenses to submit to UCR. I know: I wish I was kidding. Seems like a major oversight to me. This compounds on states having spotty data. @Babbie give a great example of only partial forcible rape data being available for any year from 2006 to 2010 in Minnesota (only the two largest cities submitted data).
+
+#### UCR Crimes are Hierarchical
+
+This is going to blow your mind straight open. Okay, think about multiple crimes being committed all within the same incident. Think about the [Killdozer](https://en.wikipedia.org/wiki/Marvin_Heemeyer): Marvin Heemeyer certainly committed a litany of crimes, but which would be reported? Under the UCR, ***only one would be reported***. That is, only the 'most serious' crime is reported if multiple are committed in the same incident. Even though a lot of terrible things happened during his rampage, attempted murder might be the only crime officially tallied as part of the UCR, and that's if the police in that part of Colorado submit to UCR at all!
+
+#### Final Thoughts on the UCR
+
+Let's bring it all together. We discussed the dark figure of crime above, but it goes further. Think about how many crimes 
+
+1. Wouldn't be crimes in other jurisdictions (who cares about ginseng?) 
+
+2. Are never noticed or no one is caught 
+
+3. Aren't reported because it's a Part II offense
+
+4. Don't get reported because the agency doesn't report any crimes at all to UCR 
+
+5. The agency made a mistake on what the most serious crime actually was
+
+At the end of the day, UCR provides summary statistics on groups. So, don't expect to see how many men killed someone in Chugiak, Alaska, in a given year. You'd be more likely to get counties or the entire state of Alaska, like the table above, and not with the details of who killed whom. This is called the [Summary Reporting System (SRS)](https://www.fbi.gov/file-repository/ucr/ucr-srs-user-manual-v1.pdf/view).
+
+Seeing all of these issues, some smart people created other measures of crime to capture more data. A good grouping of these are called incidents-based reports.
+
+### Incident-based Measures of Crime
+
+Past summary measures like UCR, there are measures of crime based on incidents. Thinking back to the Killdozer incident, there would be *many* more crimes reported if Heemeyer's spree was treated as one incident involving many crimes. So, incident-based measures of crime involve considering the totality of one event and the crimes in that event. @Babbie consider two incident-based measures of crime. 
+
+#### The Supplementary Homicide Report (SHR)
+
+The SHR is a compliment to the UCR that began in 1961. Like the name implies, it only adds to homicide data in the SRS. The SHR lets you estimate homicide statistics with more detail, like how many men killed people in Alaska in 2020. However, Chugiak is an unincorporated county, so you might need to approximate by using Anchorage PD's jurisdiction. While cool, the SHR clearly doesn't solve the problems we noted above.
+
+#### The National Incident-Based Reporting System (NIBRS)
+
+NIBRS is the FBI's effort, beginning in the '80s, to replace the UCR over time with an incident-based system. @Babbie give a fantastic review of why NIBRS is a big improvement over the SRS; I'll highlight a few aspects. The first is that many more crimes are included (cf. fraud, simple assault, and embezzlement are among the many additions). I love @Babbie's example: in Idaho in 2007, the number of crimes recorded increased the total by about 137% just by measuring more crime types with NIBRS!
+
+The second big point about NIBRS is that you get more detail about each crime. I heard a while ago that [about half of all deaths in Russia were attributable to alcohol](https://en.wikipedia.org/wiki/Alcohol_consumption_in_Russia). Looks like that research might not support extending that proportion to all of Russia, but the point there is detail. Now with NIBRS, you can see things like [how many brawls are due to alcohol](https://crime-data-explorer.fr.cloud.gov/pages/explorer/crime/shr). Explore more of the detail for yourself in the linked page! Suffice to say, NIBRS make possible so much more analysis versus the SRS.
+
+Lastly, I want to drive home one thing that @Babbie don't discuss at all. It's that not all agencies that report to UCR also do NIBRS. For instance, as of this writing 91% of agencies in Washington state (where I live) report NIBRS data, [per the CDE](https://crime-data-explorer.fr.cloud.gov/pages/home). Compare this to Florida having literally no NIBRS certified agencies. Let that sink in. We are willfully losing a TON of data, affecting our ability to make better conclusions about crimes in the United States. That being said, let's reflect on the data set I created above.
+
+### Concluding Thoughts on FBI Crime Data
+
+The data in the table above include all of the nuance discussed above. I'm going to belabor a couple of points, but let's start with one you might not have thought about. Everything figure reported represents ***crimes known to police***. If the police don't know about a crime, they certainly can't tell the FBI about it!
+
+The other major point I want to emphasize is the looming figure of the SRS within the FBI's crime data. That is, even though the data above are fairly recent, we have to keep in mind the system of including only the 'worst' crime in an incident. We ***know*** that any data on Florida will be shrouded in the SRS's problems. But, pretty much all of the data I'm making available have some element of the SRS affecting their validity.
+
+## Finishing Up + New Data Source!
+
+Okay, so let's recap: there is a shiny new tab above that I'll populate with crime data. These first data are the result of everything discussed above; the FBI's data are haunted by some legacy issues in measurement, but now you can use them in an informed manner. So analyze away! 
+
+Here's my recommendation: keep in mind any problems in the SRS that might affect your conclusions. For example, I felt good doing a project at Harvard with homicide data because they've been more extensively documented for a long time. I also think homicides would be less likely to vary due to the reporter's consideration of what crime in the incident is the 'most serious.' So, have fun using those data, and remember to consider what your data do and do not mean! This is an important part of data analysis, compounding the nuance of what an individual statistic does and does not mean.
+
+## References
+
